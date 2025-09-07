@@ -487,7 +487,7 @@ class Stockfish:
                 # discarded. So continue the loop until reaching "uciok", which is
                 # the last line SF outputs for the "uci" command.
 
-    def get_evaluation(self) -> dict:
+    def get_evaluation(self, include_principal_variation : bool = None) -> dict:
         """Evaluates current position
 
         Returns:
@@ -507,14 +507,16 @@ class Stockfish:
             if splitted_text[0] == "info":
                 for n in range(len(splitted_text)):
                     if splitted_text[n] == "score":
+                        principal_variation = " ".join(splitted_text[splitted_text.index("pv") + 1 : -1]) if "pv" in splitted_text else ""
                         evaluation = {
                             "type": splitted_text[n + 1],
                             "value": int(splitted_text[n + 2]) * compare,
+                            "line": principal_variation if include_principal_variation else None
                         }
             elif splitted_text[0] == "bestmove":
                 return evaluation
 
-    def get_top_moves(self, num_top_moves: int = 5) -> List[dict]:
+    def get_top_moves(self, num_top_moves: int = 5, include_principal_variation : bool = None) -> List[dict]:
         """Returns info on the top moves in the position.
 
         Args:
@@ -562,6 +564,7 @@ class Stockfish:
                         raise RuntimeError(
                             "Having a centipawn value and mate value should be mutually exclusive."
                         )
+                    principal_variation = " ".join(current_line[current_line.index("pv") + 1 : -1])
                     top_moves.insert(
                         0,
                         {
@@ -574,6 +577,7 @@ class Stockfish:
                             * multiplier
                             if has_mate_value
                             else None,
+                            "Line": principal_variation if include_principal_variation else None,
                         },
                     )
             else:
