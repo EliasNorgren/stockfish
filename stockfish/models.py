@@ -54,9 +54,9 @@ class Stockfish:
 
         self._has_quit_command_been_sent = False
 
-        self._stockfish_major_version: int = int(
-            self._read_line().split(" ")[1].split(".")[0].replace("-", "")
-        )
+        _version_token = self._read_line().split(" ")[1].split(".")[0].replace("-", "")
+        _digits = "".join(filter(str.isdigit, _version_token))
+        self._stockfish_major_version: int = int(_digits) if _digits else 0
 
         self._put("uci")
 
